@@ -1,6 +1,6 @@
-# net-speeder
+# net-speeder ipv6与发包倍数支持版
 net-speeder 在高延迟不稳定链路上优化单线程下载速度 
-本版本是AI生成的支持ipv6和发包数量的版本 已在debian上测试通过
+# 本版本是AI生成的支持ipv6和发包数量的版本 已在debian上测试通过
 
 项目由https://code.google.com/p/net-speeder/  迁入
 关注微信公众号了解最新开发进度/获取帮助/提出建议：
@@ -12,7 +12,7 @@ A program to speed up single thread download upon long delay and unstable networ
 另外，内部dup包并非是偷懒未判断。。。是为了更快触发快速重传的。
 注2：net-speeder不依赖ttl的大小，ttl的大小跟流量无比例关系。不存在windows的ttl大，发包就多的情况。
 
-安装步骤：
+# 安装步骤：
 
 # 1：下载源码并解压
     wget https://github.com/snooda/net-speeder/archive/master.zip
