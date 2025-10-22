@@ -34,13 +34,13 @@ sudo apt-get autoremove -y
     sudo rm -f /usr/local/lib/pkgconfig/libnet.pc
 
 # 3. 编译安装libnet1.3 支持ipv6的必要库
-wget https://github.com/libnet/libnet/releases/download/v1.3/libnet-1.3.tar.gz
-tar -xzvf libnet-1.3.tar.gz
-cd libnet-1.3/
-./configure
-make
-sudo make install
-sudo ldconfig
+    wget https://github.com/libnet/libnet/releases/download/v1.3/libnet-1.3.tar.gz
+    tar -xzvf libnet-1.3.tar.gz
+    cd libnet-1.3/
+    ./configure
+    make
+    sudo make install
+    sudo ldconfig
 
 # 4. 编译其他依赖
 debian/ubuntu：
