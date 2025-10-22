@@ -55,10 +55,10 @@ A program to speed up single thread download upon long delay and unstable networ
 
 ## 5. 编译：
 
-Linux Cooked interface使用编译（venetX，OpenVZ）：
+    #Linux Cooked interface使用编译（venetX，OpenVZ）：
     gcc -O2 -DCOOKED -o net_speeder net_speeder.c -lpcap -lnet
 
-普通网卡使用编译（Xen，KVM，物理机）：
+    #普通网卡使用编译（Xen，KVM，物理机）：
     gcc -O2 -o net_speeder net_speeder.c -lpcap -lnet
 
 ## 6. 使用方法(需要root权限启动）：
