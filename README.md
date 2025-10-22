@@ -71,7 +71,19 @@ A program to speed up single thread download upon long delay and unstable networ
     如果kvm下报错：err msg:[libnet_write_raw_ipv4(): -1 bytes written (Message too long)
     #关闭tso
     ethtool -K 网卡名 tso off
-    
+    #Centos7运行时 如果报错：
+    error while loading shared libraries: libnet.so.9: cannot open shared object file: No such file or directory
+    # 安装 libnet
+    sudo yum install -y libnet libnet-devel
+    # 如果找到 libnet.so.1，创建符号链接
+    sudo ln -s /usr/lib/libnet.so.1 /usr/lib/libnet.so.9
+    # 或者 64 位系统
+    sudo ln -s /usr/lib64/libnet.so.1 /usr/lib64/libnet.so.9
+    # 或者
+    sudo ln -s /usr/lib/x86_64-linux-gnu/libnet.so.1 /usr/lib/x86_64-linux-gnu/libnet.so.9
+    # 更新动态链接库缓存
+    sudo ldconfig
+    # 建议centos7用户尽快换装ubuntu24.04 获取更新内核以及更好的bbr加速效果
 ## 7. 注意事项：
 不建议增加发包倍数，默认的即可；
 对于网络非常差的，增加发包效果也不是很明显，发包越多实际延迟也会增加，带宽也会增加很多额外开销；
