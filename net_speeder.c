@@ -25,10 +25,15 @@
 #define SPECIAL_HOP_LIMIT 88
 #define DEFAULT_MULTIPLIER 1
 
+/* IPV6_HDRINCL 在某些旧系统上可能未定义 */
+#ifndef IPV6_HDRINCL
+#define IPV6_HDRINCL 36
+#endif
+
 typedef struct {
 	libnet_t *libnet_handler;
 	int raw_sock_v6;
-	int multiplier;  // 发包倍数
+	int multiplier;  /* 发包倍数 */
 } handler_context;
 
 void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
@@ -140,6 +145,7 @@ uint16_t calculate_ipv6_checksum(struct ip6_hdr *ip6, uint8_t protocol, void *pa
 
 void handle_ipv4_packet(handler_context *ctx, const struct pcap_pkthdr *header, const u_char *packet) {
 	struct libnet_ipv4_hdr *ip;
+	int i;
 	
 	ip = (struct libnet_ipv4_hdr*)(packet + ETHERNET_H_LEN);
 
@@ -157,14 +163,14 @@ void handle_ipv4_packet(handler_context *ctx, const struct pcap_pkthdr *header, 
 			libnet_do_checksum(ctx->libnet_handler, (u_int8_t *)ip, IPPROTO_UDP, ntohs(ip->ip_len) - ip->ip_hl * 4);
 		}
 		
-		// 根据倍数发送多次
-		for(int i = 0; i < ctx->multiplier; i++) {
+		/* 根据倍数发送多次 */
+		for(i = 0; i < ctx->multiplier; i++) {
 			int len_written = libnet_adv_write_raw_ipv4(ctx->libnet_handler, (u_int8_t *)ip, ntohs(ip->ip_len));
 			if(len_written < 0) {
 				printf("IPv4 packet len:[%d] actual write:[%d] attempt:[%d/%d]\n", 
 				       ntohs(ip->ip_len), len_written, i+1, ctx->multiplier);
 				printf("err msg:[%s]\n", libnet_geterror(ctx->libnet_handler));
-				break;  // 如果发送失败，不再继续
+				break;  /* 如果发送失败，不再继续 */
 			}
 		}
 	}
@@ -173,15 +179,20 @@ void handle_ipv4_packet(handler_context *ctx, const struct pcap_pkthdr *header, 
 void handle_ipv6_packet(handler_context *ctx, const struct pcap_pkthdr *header, const u_char *packet) {
 	struct ip6_hdr *ip6;
 	struct sockaddr_in6 dst_addr;
+	uint16_t payload_len;
+	uint8_t next_header;
+	void *payload;
+	int total_len;
+	int i;
 	
 	ip6 = (struct ip6_hdr*)(packet + ETHERNET_H_LEN);
 
 	if(ip6->ip6_hlim != SPECIAL_HOP_LIMIT) {
 		ip6->ip6_hlim = SPECIAL_HOP_LIMIT;
 		
-		uint16_t payload_len = ntohs(ip6->ip6_plen);
-		uint8_t next_header = ip6->ip6_nxt;
-		void *payload = (u_int8_t *)ip6 + sizeof(struct ip6_hdr);
+		payload_len = ntohs(ip6->ip6_plen);
+		next_header = ip6->ip6_nxt;
+		payload = (u_int8_t *)ip6 + sizeof(struct ip6_hdr);
 		
 		if(next_header == IPPROTO_TCP) {
 			struct libnet_tcp_hdr *tcp = (struct libnet_tcp_hdr *)payload;
@@ -193,15 +204,15 @@ void handle_ipv6_packet(handler_context *ctx, const struct pcap_pkthdr *header, 
 			udp->uh_sum = htons(calculate_ipv6_checksum(ip6, IPPROTO_UDP, payload, payload_len));
 		}
 		
-		int total_len = sizeof(struct ip6_hdr) + payload_len;
+		total_len = sizeof(struct ip6_hdr) + payload_len;
 		
 		/* Setup destination address */
 		memset(&dst_addr, 0, sizeof(dst_addr));
 		dst_addr.sin6_family = AF_INET6;
 		memcpy(&dst_addr.sin6_addr, &ip6->ip6_dst, sizeof(struct in6_addr));
 		
-		// 根据倍数发送多次
-		for(int i = 0; i < ctx->multiplier; i++) {
+		/* 根据倍数发送多次 */
+		for(i = 0; i < ctx->multiplier; i++) {
 			int len_written = sendto(ctx->raw_sock_v6, ip6, total_len, 0,
 			                         (struct sockaddr *)&dst_addr, sizeof(dst_addr));
 			
@@ -209,7 +220,7 @@ void handle_ipv6_packet(handler_context *ctx, const struct pcap_pkthdr *header, 
 				printf("IPv6 packet len:[%d] actual write:[%d] attempt:[%d/%d]\n", 
 				       total_len, len_written, i+1, ctx->multiplier);
 				printf("err msg:[%s]\n", strerror(errno));
-				break;  // 如果发送失败，不再继续
+				break;  /* 如果发送失败，不再继续 */
 			}
 		}
 	}
@@ -217,13 +228,17 @@ void handle_ipv6_packet(handler_context *ctx, const struct pcap_pkthdr *header, 
 
 void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
 	static int count = 1;
+	handler_context *ctx;
+	const u_char *ip_packet;
+	uint8_t version;
+	
 	count++;
 	
-	handler_context *ctx = (handler_context *)args;
+	ctx = (handler_context *)args;
 	
 	/* Determine IP version by examining the first nibble */
-	const u_char *ip_packet = packet + ETHERNET_H_LEN;
-	uint8_t version = (ip_packet[0] >> 4) & 0x0F;
+	ip_packet = packet + ETHERNET_H_LEN;
+	version = (ip_packet[0] >> 4) & 0x0F;
 	
 	if(version == 4) {
 		handle_ipv4_packet(ctx, header, packet);
@@ -245,14 +260,16 @@ libnet_t* start_libnet(char *dev) {
 }
 
 int create_raw_socket_v6() {
-	int sock = socket(AF_INET6, SOCK_RAW, IPPROTO_RAW);
+	int sock;
+	int on = 1;
+	
+	sock = socket(AF_INET6, SOCK_RAW, IPPROTO_RAW);
 	if(sock < 0) {
 		printf("create raw socket v6 failed: %s\n", strerror(errno));
 		return -1;
 	}
 	
 	/* Enable manual header inclusion */
-	int on = 1;
 	if(setsockopt(sock, IPPROTO_IPV6, IPV6_HDRINCL, &on, sizeof(on)) < 0) {
 		printf("setsockopt IPV6_HDRINCL failed: %s\n", strerror(errno));
 		close(sock);
@@ -274,12 +291,12 @@ int main(int argc, char **argv) {
 	handler_context ctx;
 	ctx.multiplier = DEFAULT_MULTIPLIER;
 
-	// 支持 2 个或 3 个参数
+	/* 支持 2 个或 3 个参数 */
 	if (argc >= 3 && argc <= 4) {
 		dev = argv[1];
 		filter_rule = argv[2];
 		
-		// 如果提供了第三个参数，解析为倍数
+		/* 如果提供了第三个参数，解析为倍数 */
 		if (argc == 4) {
 			ctx.multiplier = atoi(argv[3]);
 			if (ctx.multiplier < 1 || ctx.multiplier > 100) {
