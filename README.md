@@ -23,8 +23,8 @@ A program to speed up single thread download upon long delay and unstable networ
 2：准备编译环境
 #先清理旧版本的libnet
 # 1. 彻底清除所有 apt 版本的 libnet
-sudo apt-get purge -y libnet1-dev libnet-dev
-sudo apt-get autoremove -y
+    sudo apt-get purge -y libnet1-dev libnet-dev
+    sudo apt-get autoremove -y
 
 # 2. 彻底删除 /usr/local/ 中的残留
     sudo rm -f /usr/local/include/libnet.h
@@ -43,13 +43,13 @@ sudo apt-get autoremove -y
     sudo ldconfig
 
 # 4. 编译其他依赖
-debian/ubuntu：
+    debian/ubuntu：
     sudo apt-get update
     sudo apt-get install -y build-essential wget
     #安装libpcap-dev：
     apt-get install libpcap0.8-dev 
 
-centos：
+    centos：
     yum -y install epel-release
     #然后即可使用yum安装：
     yum install libpcap libpcap-devel
