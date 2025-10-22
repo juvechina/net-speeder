@@ -68,7 +68,7 @@ A program to speed up single thread download upon long delay and unstable networ
     # 增加发包倍数 为2倍发包：
     sudo ./net_speeder eth0 "ip" 2 
     
-如果kvm下报错：err msg:[libnet_write_raw_ipv4(): -1 bytes written (Message too long)
+    如果kvm下报错：err msg:[libnet_write_raw_ipv4(): -1 bytes written (Message too long)
     #关闭tso
     ethtool -K 网卡名 tso off
     
