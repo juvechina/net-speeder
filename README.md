@@ -67,10 +67,11 @@ A program to speed up single thread download upon long delay and unstable networ
     sudo ./net_speeder eth0 "ip or ip6"
     # 增加发包倍数 为2倍发包：
     sudo ./net_speeder eth0 "ip" 2 
-    
+## 7.异常处理：
     如果kvm下报错：err msg:[libnet_write_raw_ipv4(): -1 bytes written (Message too long)
     #关闭tso
     ethtool -K 网卡名 tso off
+    
     #Centos7运行时 如果报错：
     error while loading shared libraries: libnet.so.9: cannot open shared object file: No such file or directory
     # 安装 libnet
