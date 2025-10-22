@@ -27,11 +27,11 @@ sudo apt-get purge -y libnet1-dev libnet-dev
 sudo apt-get autoremove -y
 
 # 2. 彻底删除 /usr/local/ 中的残留
-sudo rm -f /usr/local/include/libnet.h
-sudo rm -f /usr/local/bin/libnet-config
-sudo rm -f /usr/local/lib/libnet.so*
-sudo rm -f /usr/local/lib/libnet.a
-sudo rm -f /usr/local/lib/pkgconfig/libnet.pc
+    sudo rm -f /usr/local/include/libnet.h
+    sudo rm -f /usr/local/bin/libnet-config
+    sudo rm -f /usr/local/lib/libnet.so*
+    sudo rm -f /usr/local/lib/libnet.a
+    sudo rm -f /usr/local/lib/pkgconfig/libnet.pc
 
 # 3. 编译安装libnet1.3 支持ipv6的必要库
 wget https://github.com/libnet/libnet/releases/download/v1.3/libnet-1.3.tar.gz
