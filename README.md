@@ -14,26 +14,25 @@ A program to speed up single thread download upon long delay and unstable networ
 
 安装步骤：
 
-1：下载源码并解压
-
+# 1：下载源码并解压
     wget https://github.com/snooda/net-speeder/archive/master.zip
     unzip master.zip
     替换 net_speeder.c 文件
 
-2：准备编译环境
+# 2：准备编译环境
 #先清理旧版本的libnet
-# 1. 彻底清除所有 apt 版本的 libnet
+## 1. 彻底清除所有 apt 版本的 libnet
     sudo apt-get purge -y libnet1-dev libnet-dev
     sudo apt-get autoremove -y
 
-# 2. 彻底删除 /usr/local/ 中的残留
+## 2. 彻底删除 /usr/local/ 中的残留
     sudo rm -f /usr/local/include/libnet.h
     sudo rm -f /usr/local/bin/libnet-config
     sudo rm -f /usr/local/lib/libnet.so*
     sudo rm -f /usr/local/lib/libnet.a
     sudo rm -f /usr/local/lib/pkgconfig/libnet.pc
 
-# 3. 编译安装libnet1.3 支持ipv6的必要库
+## 3. 编译安装libnet1.3 支持ipv6的必要库
     wget https://github.com/libnet/libnet/releases/download/v1.3/libnet-1.3.tar.gz
     tar -xzvf libnet-1.3.tar.gz
     cd libnet-1.3/
@@ -42,19 +41,19 @@ A program to speed up single thread download upon long delay and unstable networ
     sudo make install
     sudo ldconfig
 
-# 4. 编译其他依赖
-    debian/ubuntu：
+## 4. 编译其他依赖
+    #debian/ubuntu：
     sudo apt-get update
     sudo apt-get install -y build-essential wget
     #安装libpcap-dev：
     apt-get install libpcap0.8-dev 
 
-    centos：
+    #centos：
     yum -y install epel-release
     #然后即可使用yum安装：
     yum install libpcap libpcap-devel
 
-# 5. 编译：
+## 5. 编译：
 
 Linux Cooked interface使用编译（venetX，OpenVZ）：
     gcc -O2 -DCOOKED -o net_speeder net_speeder.c -lpcap -lnet
@@ -62,7 +61,7 @@ Linux Cooked interface使用编译（venetX，OpenVZ）：
 普通网卡使用编译（Xen，KVM，物理机）：
     gcc -O2 -o net_speeder net_speeder.c -lpcap -lnet
 
-# 6. 使用方法(需要root权限启动）：
+## 6. 使用方法(需要root权限启动）：
     sudo ./net_speeder eth0 "ip"
     sudo ./net_speeder eth0 "ip6"
     sudo ./net_speeder eth0 "ip or ip6"
@@ -73,7 +72,7 @@ Linux Cooked interface使用编译（venetX，OpenVZ）：
     #关闭tso
     ethtool -K 网卡名 tso off
     
-# 7. 注意事项：
+## 7. 注意事项：
 不建议增加发包倍数，默认的即可；
 对于网络非常差的，增加发包效果也不是很明显，发包越多实际延迟也会增加，带宽也会增加很多额外开销；
 请务必合法使用：仅用于自己的网络环境测试，请遵守当地法律
